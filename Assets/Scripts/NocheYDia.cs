@@ -19,9 +19,8 @@ public class NocheYDia : MonoBehaviour
     public Color dayColor = Color.cyan;  // Color del cielo durante el día
     public Color nightColor = Color.black; // Color del cielo durante la noche
     public Material daySkybox;      // Skybox para el día
-    public Material nightSkybox;    // Skybox para la noche
     public float maxExposure = 1f;  // Exposición máxima durante el día
-    public float minExposure = 0.06f;  // Exposición mínima durante la noche
+    public float minExposure = 0.3f;  // Exposición mínima durante la noche
 
     [Header("Skybox Rotation")]
     public float rotationSpeed = 1f; // Velocidad de rotación de las nubes
@@ -94,7 +93,7 @@ public class NocheYDia : MonoBehaviour
         }
         else // Noche
         {
-            RenderSettings.skybox = nightSkybox;
+            RenderSettings.skybox = daySkybox;
             SetSkyboxExposure(minExposure); // Exposición mínima durante la noche
         }
     }
