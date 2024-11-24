@@ -5,8 +5,8 @@ using UnityEngine;
 public class NocheYDia : MonoBehaviour
 {
       [Header("Cycle Settings")]
-    public float dayDuration = 60f;
-    public float tiltAngle = 23.5f;
+    public float dayDuration = 90f;
+    public float tiltAngle = 47f;
 
     [Header("Lights")]
     public Light sunLight;
@@ -20,7 +20,7 @@ public class NocheYDia : MonoBehaviour
     public Color nightColor = Color.black; // Color del cielo durante la noche
     public Material daySkybox;      // Skybox para el día
     public float maxExposure = 1f;  // Exposición máxima durante el día
-    public float minExposure = 0.3f;  // Exposición mínima durante la noche
+    public float minExposure = 0.06f;  // Exposición mínima durante la noche
 
     [Header("Skybox Rotation")]
     public float rotationSpeed = 1f; // Velocidad de rotación de las nubes
