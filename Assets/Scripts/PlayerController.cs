@@ -4,64 +4,58 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [Header("Movement Settings")]
-    public float moveSpeed = 5f;   // Velocidad de movimiento
-    public float jumpForce = 7f;   // Fuerza de salto
-    public float rotationSpeed = 700f;  // Velocidad de rotación del personaje
+    public float moveSpeed = 5f; // Velocidad de movimiento
+    public float jumpForce = 5f; // Fuerza del salto
+    public float gravityScale = 1f; // Escala de gravedad personalizada
 
-    [Header("References")]
-    public Rigidbody rb;  // Referencia al Rigidbody del personaje
-    public Transform cameraTransform;  // Referencia a la cámara para la dirección del movimiento
+    public LayerMask groundLayer; // Capa del suelo
+    public Transform groundCheck; // Punto desde donde se verifica el suelo
+    public float groundCheckRadius = 0.2f; // Radio para detectar el suelo
 
-    private float moveX, moveZ;
-
-    private bool isGrounded; // Para comprobar si el personaje está en el suelo
+    private Rigidbody rb; // Referencia al Rigidbody
+    private bool isGrounded; // Verifica si el jugador está tocando el suelo
 
     void Start()
     {
-        // Si no se asignó un Rigidbody en el Inspector, lo conseguimos automáticamente
+        rb = GetComponent<Rigidbody>(); // Obtiene el Rigidbody del objeto
         if (rb == null)
         {
-            rb = GetComponent<Rigidbody>();
+            Debug.LogError("¡Falta un Rigidbody en el objeto!");
         }
-
-        // Configuramos la gravedad en el Rigidbody si no se asignó
-        rb.useGravity = true;
     }
 
     void Update()
     {
-        // Obtención de entradas para el movimiento (W, A, S, D o flechas)
-        moveX = Input.GetAxis("Horizontal"); // Movimiento en el eje X (izquierda/derecha)
-        moveZ = Input.GetAxis("Vertical");   // Movimiento en el eje Z (adelante/atrás)
+        // Verificar si está tocando el suelo
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
 
-        // Movimiento del personaje en 3D (usando la cámara para la dirección)
-        Vector3 moveDirection = (cameraTransform.forward * moveZ) + (cameraTransform.right * moveX);
-        moveDirection.y = 0f; // Descartamos cualquier movimiento en el eje Y para que no se mueva hacia arriba o abajo
+        // Movimiento horizontal y vertical (WASD)
+        float moveX = Input.GetAxis("Horizontal") * moveSpeed;
+        float moveZ = Input.GetAxis("Vertical") * moveSpeed;
 
-        // Aplicamos el movimiento al Rigidbody en los ejes X y Z
-        rb.velocity = new Vector3(moveDirection.x * moveSpeed, rb.velocity.y, moveDirection.z * moveSpeed);
+        // Aplicar movimiento
+        Vector3 movement = new Vector3(moveX, rb.velocity.y, moveZ);
+        rb.velocity = movement;
 
-        // Rotación suave hacia la dirección en la que se mueve el personaje
-        if (moveDirection != Vector3.zero)
-        {
-            Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
-        }
-
-        // Comprobación de si el jugador está en el suelo antes de permitir saltar
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, 1f); // Raycast hacia abajo para comprobar el suelo
-
-        // Salto si el jugador está en el suelo y presiona la barra espaciadora
+        // Salto
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
-            Jump();
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
+
+        // Aplicar gravedad personalizada
+        rb.AddForce(Physics.gravity * (gravityScale - 1) * rb.mass);
     }
 
-    private void Jump()
+    void OnDrawGizmosSelected()
     {
-        // Aplicamos la fuerza para saltar
-        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        // Dibuja un gizmo para visualizar el área de detección del suelo
+        if (groundCheck != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
     }
 }
+
+// tenemos que poner A y D para rotar en vez de moverse
