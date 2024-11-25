@@ -1,54 +1,32 @@
-using Cinemachine;
 using UnityEngine;
+using System.Collections.Generic;
+using System.Collections;
+
 
 public class CamaraController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public float jumpHeight = 2f;
-    public float groundCheckDistance = 0.1f; // Distancia del raycast para verificar el suelo
-    private bool isGrounded;
+  public Transform orientation;
+  public Transform player;
+  public Transform playerObj;
+  public Rigidbody rb;
 
-    private Rigidbody rb;
+  public float rotationSpeed;
 
-    void Start()
-    {
-        rb = GetComponent<Rigidbody>();
+  private void Start(){
+    Cursor.lockState = CursorLockMode.Locked;
+    Cursor.visible = false;
+  }
+
+  private void Update(){
+    Vector3 viewDir = player.position - new Vector3(transform.position.x , player.position.y, transform.position.z);
+    orientation.forward = viewDir.normalized;
+
+    float horizontalInput = Input.GetAxis("Horizontal");
+    float verticalInput = Input.GetAxis("Vertical");
+    Vector3 inputDir = orientation.forward * verticalInput + orientation.right * horizontalInput;
+
+    if(inputDir != Vector3.zero){
+playerObj.forward = Vector3.Slerp(playerObj.forward, inputDir.normalized, Time.deltaTime * rotationSpeed);
     }
-
-    void Update()
-    {
-        MovePlayer();
-        CheckGroundStatus();
-    }
-
-    void MovePlayer()
-    {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-
-        Vector3 movement = new Vector3(horizontal, 0, vertical).normalized * moveSpeed;
-        movement.y = rb.velocity.y; // Mantener la velocidad en el eje Y (salto y gravedad)
-        rb.velocity = movement;
-        
-        // Saltar solo si está tocando el suelo
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            Jump();
-        }
-    }
-
-    void CheckGroundStatus()
-    {
-        // Realizamos un Raycast hacia abajo desde el centro del jugador para ver si está tocando el suelo
-        RaycastHit hit;
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, out hit, groundCheckDistance);
-
-        // También puedes ajustar esto para detectar objetos específicos si lo necesitas.
-    }
-
-    void Jump()
-    {
-        // Salto
-        rb.AddForce(Vector3.up * jumpHeight, ForceMode.Impulse);
-    }
+  }
 }
