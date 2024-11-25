@@ -4,41 +4,56 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f; // Velocidad de movimiento
+     public float moveSpeed = 5f; // Velocidad de movimiento
     public float jumpForce = 5f; // Fuerza del salto
     public float gravityScale = 1f; // Escala de gravedad personalizada
-
     public LayerMask groundLayer; // Capa del suelo
+
     public Transform groundCheck; // Punto desde donde se verifica el suelo
     public float groundCheckRadius = 0.2f; // Radio para detectar el suelo
 
     private Rigidbody rb; // Referencia al Rigidbody
     private bool isGrounded; // Verifica si el jugador está tocando el suelo
 
-    void Start()
+    [Header("Camera")]
+    public Transform orientation; // Referencia a la orientación de la cámara
+
+    private void Start()
     {
-        rb = GetComponent<Rigidbody>(); // Obtiene el Rigidbody del objeto
+        rb = GetComponent<Rigidbody>();
         if (rb == null)
         {
             Debug.LogError("¡Falta un Rigidbody en el objeto!");
         }
+
+        // Congelar rotaciones no deseadas
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
     }
 
-    void Update()
+    private void FixedUpdate()
     {
         // Verificar si está tocando el suelo
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
 
-        // Movimiento horizontal y vertical (WASD)
-        float moveX = Input.GetAxis("Horizontal") * moveSpeed;
-        float moveZ = Input.GetAxis("Vertical") * moveSpeed;
+        // Movimiento
+        float moveInputVertical = Input.GetAxisRaw("Vertical"); // W/S o flechas arriba/abajo
+        float moveInputHorizontal = Input.GetAxisRaw("Horizontal"); // A/D o flechas izquierda/derecha
 
-        // Aplicar movimiento
-        Vector3 movement = new Vector3(moveX, rb.velocity.y, moveZ);
-        rb.velocity = movement;
+        Vector3 moveDir = orientation.forward * moveInputVertical + orientation.right * moveInputHorizontal;
+        moveDir.y = 0f; // Evitar movimiento en el eje Y
+        moveDir.Normalize();
+
+        if (moveDir != Vector3.zero)
+        {
+            rb.velocity = new Vector3(moveDir.x * moveSpeed, rb.velocity.y, moveDir.z * moveSpeed);
+        }
+        else
+        {
+            rb.velocity = new Vector3(0f, rb.velocity.y, 0f); // Detener si no hay entrada
+        }
 
         // Salto
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetButton("Jump") && isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
@@ -46,16 +61,4 @@ public class PlayerController : MonoBehaviour
         // Aplicar gravedad personalizada
         rb.AddForce(Physics.gravity * (gravityScale - 1) * rb.mass);
     }
-
-    void OnDrawGizmosSelected()
-    {
-        // Dibuja un gizmo para visualizar el área de detección del suelo
-        if (groundCheck != null)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
-        }
-    }
 }
-
-// tenemos que poner A y D para rotar en vez de moverse
