@@ -7,12 +7,12 @@ public class PlayerController : MonoBehaviour
     [Header("Movement")]
     public float walkSpeed = 6f; // Velocidad al caminar
     public float runSpeed = 12f; // Velocidad al correr
-    public float jumpForce = 8f; // Fuerza del salto
+    public float jumpForce = 16f; // Fuerza del salto
     public float gravityScale = 3f; // Escala de gravedad personalizada
     public LayerMask groundLayer; // Capa del suelo
 
     public Transform groundCheck; // Punto desde donde se verifica el suelo
-    public float groundCheckRadius = 0.4f; // Radio para detectar el suelo
+    public float groundCheckRadius = 0.3f; // Radio para detectar el suelo
 
     private Rigidbody rb; // Referencia al Rigidbody
     private bool isGrounded; // Verifica si el jugador está tocando el suelo
